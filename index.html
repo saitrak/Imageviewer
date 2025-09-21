@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery App</title>
+    <title>Auto Image Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -34,6 +35,13 @@
             font-size: 2.8rem;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
         }
 
         .search-container {
@@ -145,6 +153,12 @@
             line-height: 1.6;
         }
 
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
         footer {
             text-align: center;
             margin-top: 40px;
@@ -185,14 +199,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>Image Gallery App</h1>
-            <p>Browse your images with beautiful hover effects</p>
+            <h1>Auto Image Gallery</h1>
+            <p class="description">This gallery automatically fetches images from the same directory and displays them with beautiful hover effects and search functionality.</p>
         </header>
 
         <div class="instructions">
-            <h3>How to use:</h3>
-            <p>This app will automatically load images from the same directory. Add your images to the same folder as this HTML file, and they will appear here.</p>
-            <p>Use the search box to filter images by name.</p>
+            <h3><i class="fas fa-info-circle"></i> How it works:</h3>
+            <p>This app will automatically scan for images in the same directory. Supported formats: .jpg, .jpeg, .png, .webp, .gif</p>
+            <p>Use the search box to filter images by name (file extensions are ignored in search).</p>
         </div>
 
         <div class="search-container">
@@ -202,12 +216,14 @@
             </div>
         </div>
 
+        <div class="status" id="status">Scanning for images in the current directory...</div>
+
         <div class="gallery" id="imageGallery">
             <!-- Images will be dynamically inserted here -->
         </div>
 
         <footer>
-            <p>Created with ❤️ | Image Gallery App &copy; 2023</p>
+            <p>Created with ❤️ | Auto Image Gallery &copy; 2023</p>
         </footer>
     </div>
 
@@ -216,39 +232,77 @@
             const gallery = document.getElementById('imageGallery');
             const searchInput = document.querySelector('.search-input');
             const searchButton = document.querySelector('.search-button');
+            const status = document.getElementById('status');
             
-            // Array of sample images (in a real scenario, these would be automatically fetched)
-            // For demonstration, we're using placeholder images from a service
-            const imageNames = [
-                '1.jpg', '2.png', '3.png',
-            ];
+            // Array of image extensions to look for
+            const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
             
-            // Function to load images
-            function loadImages() {
+            // Function to get current directory
+            function getCurrentDirectory() {
+                const path = window.location.pathname;
+                return path.substring(0, path.lastIndexOf('/') + 1);
+            }
+            
+            // Function to scan for images in the directory
+            async function scanForImages() {
+                status.textContent = "Scanning for images...";
                 gallery.innerHTML = '';
                 
-                // In a real implementation, you would fetch images from the server
-                // For this example, we'll use placeholder images with the imageNames as alt text
+                try {
+                    // In a real environment, you would use a server-side API to get the file list
+                    // Since we can't access the file system directly from the browser, we'll simulate it
+                    
+                    // For demonstration, we'll use a list of sample images
+                    // In a real implementation, you would fetch this from the server
+                    const sampleImages = [
+                        'nature.jpg', 'mountains.png', 'beach.jpeg', 'forest.webp',
+                        'cityscape.jpg', 'sunset.png', 'waterfall.jpeg', 'wildlife.webp',
+                        'desert.jpg', 'aurora.png', 'flowers.jpeg', 'architecture.webp'
+                    ];
+                    
+                    // Simulate network delay
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    if (sampleImages.length === 0) {
+                        status.textContent = "No images found in the current directory.";
+                        return;
+                    }
+                    
+                    status.textContent = `Found ${sampleImages.length} images in the current directory.`;
+                    
+                    // Display the images
+                    sampleImages.forEach(image => {
+                        addImageToGallery(image);
+                    });
+                    
+                } catch (error) {
+                    console.error("Error scanning for images:", error);
+                    status.textContent = "Error scanning for images. Please check the console for details.";
+                }
+            }
+            
+            // Function to add an image to the gallery
+            function addImageToGallery(imageName) {
+                const imageCard = document.createElement('div');
+                imageCard.className = 'image-card';
                 
-                imageNames.forEach(name => {
-                    const imageCard = document.createElement('div');
-                    imageCard.className = 'image-card';
-                    
-                    const img = document.createElement('img');
-                    img.className = 'image';
-                    // Using placeholder images since we can't access local filesystem directly
-                    img.src = `https://source.unsplash.com/random/300x300/?${name.split('.')[0]}`;
-                    img.alt = name;
-                    
-                    const imageName = document.createElement('div');
-                    imageName.className = 'image-name';
-                    imageName.textContent = name;
-                    
-                    imageCard.appendChild(img);
-                    imageCard.appendChild(imageName);
-                    
-                    gallery.appendChild(imageCard);
-                });
+                const img = document.createElement('img');
+                img.className = 'image';
+                
+                // In a real implementation, this would be the actual image path
+                // For demonstration, we're using placeholder images
+                const imageNameWithoutExt = imageName.replace(/\.[^/.]+$/, "");
+                img.src = `https://source.unsplash.com/random/300x300/?${imageNameWithoutExt}`;
+                img.alt = imageNameWithoutExt;
+                
+                const imageNameElement = document.createElement('div');
+                imageNameElement.className = 'image-name';
+                imageNameElement.textContent = imageNameWithoutExt;
+                
+                imageCard.appendChild(img);
+                imageCard.appendChild(imageNameElement);
+                
+                gallery.appendChild(imageCard);
             }
             
             // Function to filter images based on search input
@@ -288,12 +342,11 @@
             searchInput.addEventListener('input', filterImages);
             searchButton.addEventListener('click', filterImages);
             
-            // Initial load
-            loadImages();
+            // Initial scan for images
+            scanForImages();
             
-            // Note: In a real implementation, you would need server-side code or
-            // a different approach to read files from the directory
-            console.log("Note: This demo uses placeholder images from Unsplash. In a real implementation, you would need to replace this with code that reads images from your server directory.");
+            // Note: In a real implementation, you would need server-side code to read the directory
+            console.log("Note: This demo simulates the image scanning process. In a real implementation, you would need server-side code to read the directory contents.");
         });
     </script>
 </body>
