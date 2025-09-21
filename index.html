@@ -1,1 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .search-box {
+            display: flex;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-button {
+            padding: 15px 25px;
+            border: none;
+            background: #ff6b6b;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .search-button:hover {
+            background: #ff5252;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .image-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            height: 280px;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .image-card:hover .image {
+            transform: scale(1.1);
+        }
+
+        .image-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: white;
+            padding: 20px 15px 15px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .image-card:hover .image-name {
+            transform: translateY(0);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .search-input {
+                padding: 12px 15px;
+            }
+            
+            .search-button {
+                padding: 12px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Image Gallery App</h1>
+            <p>Browse your images with beautiful hover effects</p>
+        </header>
+
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <p>This app will automatically load images from the same directory. Add your images to the same folder as this HTML file, and they will appear here.</p>
+            <p>Use the search box to filter images by name.</p>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search images by name...">
+                <button class="search-button">Search</button>
+            </div>
+        </div>
+
+        <div class="gallery" id="imageGallery">
+            <!-- Images will be dynamically inserted here -->
+        </div>
+
+        <footer>
+            <p>Created with ❤️ | Image Gallery App &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gallery = document.getElementById('imageGallery');
+            const searchInput = document.querySelector('.search-input');
+            const searchButton = document.querySelector('.search-button');
+            
+            // Array of sample images (in a real scenario, these would be automatically fetched)
+            // For demonstration, we're using placeholder images from a service
+            const imageNames = [
+                'n.jpg', 'mountains.png', 'beach.jpeg', 'forest.webp',
+            ];
+            
+            // Function to load images
+            function loadImages() {
+                gallery.innerHTML = '';
+                
+                // In a real implementation, you would fetch images from the server
+                // For this example, we'll use placeholder images with the imageNames as alt text
+                
+                imageNames.forEach(name => {
+                    const imageCard = document.createElement('div');
+                    imageCard.className = 'image-card';
+                    
+                    const img = document.createElement('img');
+                    img.className = 'image';
+                    // Using placeholder images since we can't access local filesystem directly
+                    img.src = `https://source.unsplash.com/random/300x300/?${name.split('.')[0]}`;
+                    img.alt = name;
+                    
+                    const imageName = document.createElement('div');
+                    imageName.className = 'image-name';
+                    imageName.textContent = name;
+                    
+                    imageCard.appendChild(img);
+                    imageCard.appendChild(imageName);
+                    
+                    gallery.appendChild(imageCard);
+                });
+            }
+            
+            // Function to filter images based on search input
+            function filterImages() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const imageCards = document.querySelectorAll('.image-card');
+                
+                let hasResults = false;
+                
+                imageCards.forEach(card => {
+                    const imageAlt = card.querySelector('img').alt.toLowerCase();
+                    if (imageAlt.includes(searchTerm)) {
+                        card.style.display = 'block';
+                        hasResults = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Show no results message if needed
+                if (!hasResults) {
+                    if (!document.querySelector('.no-results')) {
+                        const noResults = document.createElement('div');
+                        noResults.className = 'no-results';
+                        noResults.textContent = 'No images found matching your search.';
+                        gallery.appendChild(noResults);
+                    }
+                } else {
+                    const noResults = document.querySelector('.no-results');
+                    if (noResults) {
+                        noResults.remove();
+                    }
+                }
+            }
+            
+            // Event listeners
+            searchInput.addEventListener('input', filterImages);
+            searchButton.addEventListener('click', filterImages);
+            
+            // Initial load
+            loadImages();
+            
+            // Note: In a real implementation, you would need server-side code or
+            // a different approach to read files from the directory
+            console.log("Note: This demo uses placeholder images from Unsplash. In a real implementation, you would need to replace this with code that reads images from your server directory.");
+        });
+    </script>
+</body>
+</html>
